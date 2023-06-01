@@ -13,7 +13,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
-const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/tourism';
+const dbUrl = process.env.dburl || 'mongodb://127.0.0.1:27017/tourism';
 const MongoStore = require('connect-mongo')(session);
 
 const destinationRoutes = require('./routes/destinations');
