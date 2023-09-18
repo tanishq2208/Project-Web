@@ -14,14 +14,14 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const dbUrl = process.env.dburl || 'mongodb://127.0.0.1:27017/tourism';
-const MongoStore = require('connect-mongo')(session);
+const mongoStore = require("connect-mongo");
 const port = process.env.PORT || 3000;
 
 const destinationRoutes = require('./routes/destinations');
 const reviewRoutes = require('./routes/reviews');
 const userRoutes = require('./routes/users');
 
-const monogSanitize = require('express-mongo-sanitize'); // this will sanitize any html code embedded within the req.body
+const monogSanitize = require('express-mongo-sanitize'); // used to prevent MongoDB operator injection attacks by sanitizing user input before interacting with the MongoDB database. 
 
 // 'mongodb://127.0.0.1:27017/tourism'
 mongoose.connect(dbUrl, {
@@ -48,14 +48,19 @@ app.use(monogSanitize());
 
 const secret = process.env.SECRET || 'thisisasecret';
 
-const store = new MongoStore({
-    url : dbUrl,
+const store = mongoStore.create({
+    mongoUrl : dbUrl,
     secret: secret,
     touchAfter: 24*60*60
 });
 
+store.on("error", function (e){
+    console.log("Session Store Error", e);
+})
+
 const sessionConfig = {
     store: store,
+    name: 'session',
     secret: secret,
     resave: false,
     saveUninitialized: true,
@@ -89,11 +94,11 @@ app.use('/', userRoutes);
 app.use('/destinations', destinationRoutes);
 app.use('/destinations/:id/reviews', reviewRoutes);
 
-app.get('/fakeUser', async(req, res) => {
-    const user = new User({email: 'temp@gmial.com', username: 'temp'});
-    const newUser = await User.register(user, 'chicken');
-    res.render(newUser);
-})
+// app.get('/fakeUser', async(req, res) => {
+//     const user = new User({email: 'temp@gmial.com', username: 'temp'});
+//     const newUser = await User.register(user, 'chicken');
+//     res.render(newUser);
+// })
 
 app.get('/', (req, res) => {
     res.render('home');
@@ -110,5 +115,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(port, () => {
-    console.log('Serving on port ${port}');
+    console.log(`Serving on port ${port}`);
 })
