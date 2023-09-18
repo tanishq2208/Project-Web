@@ -15,6 +15,7 @@ const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const dbUrl = process.env.dburl || 'mongodb://127.0.0.1:27017/tourism';
 const MongoStore = require('connect-mongo')(session);
+const port = process.env.PORT || 3000;
 
 const destinationRoutes = require('./routes/destinations');
 const reviewRoutes = require('./routes/reviews');
@@ -108,6 +109,6 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render('error', {err});
 })
 
-app.listen(3000, () => {
-    console.log('Serving on port 3000');
+app.listen(port, () => {
+    console.log('Serving on port ${port}');
 })
